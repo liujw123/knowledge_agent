@@ -2,6 +2,8 @@
   "name": "@kb/server",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
+  "author": "Liujw",
   "type": "module",
   "scripts": {
     "dev": "node --watch-path=src src/index.js",

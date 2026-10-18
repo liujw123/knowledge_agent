@@ -2,12 +2,23 @@
   "name": "knowledge-agent",
   "version": "1.0.0",
   "private": true,
+  "license": "MIT",
+  "author": "Liujw",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/liujw123/knowledge_agent.git"
+  },
+  "homepage": "https://github.com/liujw123/knowledge_agent",
+  "bugs": {
+    "url": "https://github.com/liujw123/knowledge_agent/issues"
+  },
   "packageManager": "pnpm@11.24.0",
   "scripts": {
     "dev": "pnpm -r --parallel dev",
     "dev:server": "pnpm --filter @kb/server dev",
     "dev:web": "pnpm --filter @kb/web dev",
     "build": "pnpm --filter @kb/web build",
-    "start": "pnpm --filter @kb/server start"
+    "start": "pnpm --filter @kb/server start",
+    "notices": "node scripts/generate-notices.mjs"
   }
 }

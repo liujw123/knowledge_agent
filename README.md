@@ -2,6 +2,8 @@
 
 基于 **Vue 3 + Node.js + 多模型 Agent** 的全栈知识库助手，默认接入 DeepSeek。上传 Markdown / PDF / DOCX 等文档后，Agent 会先检索知识库，再流式生成带可点击引用的回答。
 
+> GitHub: https://github.com/liujw123/knowledge_agent
+
 > 关于 Dify：为了做到「克隆即跑、不依赖 Docker」，本实现把原方案中的 Dify 引擎替换成了 Node.js 内置的轻量 RAG + Agent 层。BFF、SSE 流式协议、DeepSeek、Agent 工具调用、引用联动这些核心架构保持不变。检索与 Agent 层是独立的，后续可以平滑替换为 Dify 或向量数据库。
 
 ## 功能
@@ -57,6 +59,8 @@ knowledge_agent/
 要求：Node.js >= 20、pnpm。
 
 ```bash
+git clone https://github.com/liujw123/knowledge_agent.git
+cd knowledge_agent
 pnpm install
 pnpm dev
 ```
@@ -229,3 +233,10 @@ proxy_buffering off;
 proxy_cache off;
 proxy_read_timeout 300s;
 ```
+
+## License
+
+MIT © 2026 Liujw
+
+第三方依赖许可证见 [THIRD_PARTY_NOTICES.md](./THIRD_PARTY_NOTICES.md)。
+
