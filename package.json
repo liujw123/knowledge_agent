@@ -1,0 +1,13 @@
+{
+  "name": "knowledge-agent",
+  "version": "1.0.0",
+  "private": true,
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:server": "pnpm --filter @kb/server dev",
+    "dev:web": "pnpm --filter @kb/web dev",
+    "build": "pnpm --filter @kb/web build",
+    "start": "pnpm --filter @kb/server start"
+  }
+}
