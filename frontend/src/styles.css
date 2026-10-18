@@ -571,14 +571,6 @@ kbd {
   font-size: 9px;
 }
 
-.document-expiry {
-  color: #66758a;
-}
-
-.document-expiry.expiring {
-  color: #cf9f56;
-}
-
 .document-delete {
   display: none;
   flex: 0 0 auto;

@@ -16,8 +16,6 @@ export class KnowledgeStore {
     this.stateFile = path.join(config.dataDir, 'knowledge.json')
     this.filesDir = path.join(config.dataDir, 'files')
     this.writeQueue = Promise.resolve()
-    this.cleanupPromise = null
-    this.ttlMs = config.documentTtlHours * 60 * 60 * 1000
   }
 
   async init() {
@@ -37,61 +35,7 @@ export class KnowledgeStore {
       }
     }
 
-    let migrated = false
-    this.documents = this.documents.map((document) => {
-      if (document.expiresAt) return document
-      migrated = true
-      const createdAt = new Date(document.createdAt || Date.now()).getTime()
-      return {
-        ...document,
-        expiresAt: new Date(
-          (Number.isFinite(createdAt) ? createdAt : Date.now()) + this.ttlMs
-        ).toISOString()
-      }
-    })
-
-    if (migrated) {
-      await this.persist(this.documents).catch((error) => {
-        console.error('[knowledge] Failed to persist expiry migration:', error.message)
-      })
-    }
-
-    await this.cleanupExpired()
     this.rebuild()
-  }
-
-  async cleanupExpired() {
-    if (this.cleanupPromise) return this.cleanupPromise
-    this.cleanupPromise = this.runCleanup().finally(() => {
-      this.cleanupPromise = null
-    })
-    return this.cleanupPromise
-  }
-
-  async runCleanup() {
-    const now = Date.now()
-    const expired = this.documents.filter((document) => {
-      const expiresAt = new Date(document.expiresAt).getTime()
-      return !Number.isFinite(expiresAt) || expiresAt <= now
-    })
-
-    if (!expired.length) return 0
-
-    const nextDocuments = this.documents.filter(
-      (document) => !expired.some((item) => item.id === document.id)
-    )
-
-    await this.persist(nextDocuments)
-    this.documents = nextDocuments
-    this.rebuild()
-
-    await Promise.all(
-      expired.map((document) =>
-        fs.unlink(path.join(this.filesDir, `${document.id}${document.extension}`)).catch(() => {})
-      )
-    )
-
-    return expired.length
   }
 
   rebuild() {
@@ -113,8 +57,7 @@ export class KnowledgeStore {
   stats() {
     return {
       documentCount: this.documents.length,
-      chunks: this.chunks.length,
-      ttlHours: config.documentTtlHours
+      chunks: this.chunks.length
     }
   }
 
@@ -135,7 +78,6 @@ export class KnowledgeStore {
   }
 
   async addDocument({ name, buffer, size }) {
-    await this.cleanupExpired()
     const extension = path.extname(name).toLowerCase()
     const id = randomUUID()
     const text = await extractText(name, buffer, config.upload.maxExtractedChars)
@@ -148,14 +90,12 @@ export class KnowledgeStore {
 
     if (!chunks.length) throw new Error('文档内容过短，无法建立索引')
 
-    const createdAt = new Date()
     const document = {
       id,
       name,
       extension,
       size,
-      createdAt: createdAt.toISOString(),
-      expiresAt: new Date(createdAt.getTime() + this.ttlMs).toISOString(),
+      createdAt: new Date().toISOString(),
       characters: text.length,
       chunkCount: chunks.length,
       chunks

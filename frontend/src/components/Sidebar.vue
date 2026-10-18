@@ -1,5 +1,5 @@
 <script setup>
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useChatStore } from '../stores/chat'
 import { useKnowledgeStore } from '../stores/knowledge'
 import { useUiStore } from '../stores/ui'
@@ -21,21 +21,9 @@ const activeTab = computed({
 })
 const dragging = ref(false)
 const fileInput = ref(null)
-const now = ref(Date.now())
-let ttlTimer = null
 
 const sessions = computed(() => chat.sessions)
 const documentCount = computed(() => knowledge.documents.length)
-
-onMounted(() => {
-  ttlTimer = window.setInterval(() => {
-    now.value = Date.now()
-  }, 60_000)
-})
-
-onBeforeUnmount(() => {
-  if (ttlTimer) window.clearInterval(ttlTimer)
-})
 
 function selectSession(id) {
   chat.selectSession(id)
@@ -109,20 +97,6 @@ function formatDate(value) {
   } catch {
     return ''
   }
-}
-
-function expiryLabel(value) {
-  if (!value) return '有效期未知'
-  const expiresAt = new Date(value).getTime()
-  if (!Number.isFinite(expiresAt)) return '有效期未知'
-  const remaining = expiresAt - now.value
-  if (remaining <= 0) return '已过期'
-
-  const totalMinutes = Math.ceil(remaining / 60_000)
-  const hours = Math.floor(totalMinutes / 60)
-  const minutes = totalMinutes % 60
-  if (hours > 0) return `${hours}h ${minutes}m 后过期`
-  return `${Math.max(1, minutes)}m 后过期`
 }
 
 function preview(session) {
@@ -243,8 +217,7 @@ function preview(session) {
           @change="handleFiles($event.target.files)"
         />
         <p class="upload-formats">
-          支持任意可提取文本的文件（PDF / DOCX / HTML / Markdown 等）；不限制大小，
-          上传后 {{ knowledge.ttlHours }} 小时自动清理。
+          支持任意可提取文本的文件（PDF / DOCX / HTML / Markdown 等）；不限制大小。
         </p>
 
         <div v-if="knowledge.error" class="inline-error">
@@ -262,14 +235,7 @@ function preview(session) {
             <span class="document-body">
               <span class="document-name" :title="document.name">{{ document.name }}</span>
               <span class="document-meta">
-                {{ document.chunkCount }} 段 · {{ formatSize(document.size) }} ·
-                <span
-                  class="document-expiry"
-                  :class="{ expiring: new Date(document.expiresAt).getTime() - Date.now() < 2 * 3600_000 }"
-                  :title="document.expiresAt ? `过期时间：${new Date(document.expiresAt).toLocaleString('zh-CN')}` : ''"
-                >
-                  {{ expiryLabel(document.expiresAt) }}
-                </span>
+                {{ document.chunkCount }} 段 · {{ formatSize(document.size) }}
               </span>
             </span>
             <button

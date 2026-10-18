@@ -8,7 +8,7 @@
 
 ## 功能
 
-- **知识库扩展**：页面上传任意可解析文本的文件（PDF / DOCX / HTML / Markdown / CSV / 代码文本等），自动解析、切分、建立索引，支持删除。文件默认 **24 小时后自动过期清理**。
+- **知识库扩展**：页面上传任意可解析文本的文件（PDF / DOCX / HTML / Markdown / CSV / 代码文本等），自动解析、切分、建立索引，支持手动删除。
 - **多模型配置**：前端添加多个 OpenAI 兼容模型，填写 Base URL / API Key 后自动请求 `/models`，通过下拉框选择模型 ID；也可以手动输入。必须先通过连接测试才能保存和启用。
 - **Agent 检索**：模型 Function Calling 决定何时调用 `search_knowledge_base` / `list_knowledge_documents`。
 - **流式回答**：Node 将 DeepSeek 的流转换为统一 SSE 事件，前端通过 `fetch + ReadableStream` 消费。
@@ -74,7 +74,6 @@ pnpm dev
 2. 填入 Base URL、API Key，模型 ID 下拉框会自动从 `/models` 拉取最新列表。
 3. 选择模型后点击「测试连接」，成功后才能点击「保存并启用」。
 4. 打开左侧「知识库」上传文档，然后开始提问。
-   上传的文档默认 24 小时后过期，服务端会自动删除文档、chunk 和原始文件。
 
 默认 DeepSeek 配置：
 
@@ -110,8 +109,6 @@ pnpm start
 | `RAG_TOP_K` | `5` | 每次检索片段数 |
 | `MAX_UPLOAD_MB` | 不限制 | 可选，单文件大小上限；不配置表示不限制 |
 | `MAX_EXTRACTED_CHARS` | 不限制 | 可选，单文档参与索引的最大字符数 |
-| `DOCUMENT_TTL_HOURS` | `24` | 上传文档有效期（小时） |
-| `CLEANUP_INTERVAL_MINUTES` | `10` | 服务端定时清理过期文档的间隔 |
 | `CORS_ORIGIN` | `*` | 允许的前端来源，多个用逗号分隔 |
 | `DATA_DIR` | `server/data` | 知识库数据目录 |
 
@@ -188,7 +185,7 @@ DeepSeek 目前不提供 Embedding 接口，因此默认使用 **BM25 词法检�
 - `agent.js`：最多 N 轮 tool loop；检索结果编号去重；超过轮数后强制不带工具收尾。
 - `model.js`：模型配置校验、Base URL 规范化、`/models` 模型列表、OpenAI 兼容连通性测试。
 - `deepseek.js`：解析 OpenAI 兼容的流式 `content` 与分片 `tool_calls`。
-- `store.js`：JSON 快照 + 原子替换写盘，上传 / 删除后重建 BM25 索引；启动、定时任务、列表 / 上传 / 聊天前清理 24 小时过期文档。
+- `store.js`：JSON 快照 + 原子替换写盘，上传 / 删除后重建 BM25 索引。
 - `index.js`：SSE 心跳、客户端断开时中止上游请求、统一错误处理。
 
 ## 生产化建议
@@ -197,7 +194,7 @@ DeepSeek 目前不提供 Embedding 接口，因此默认使用 **BM25 词法检�
 
 - **鉴权**：当前没有登录体系，请加 JWT / Session 并隔离不同用户的知识库。
 - **模型 Key**：当前为演示版，API Key 存在浏览器 `localStorage` 并随聊天请求发送；生产环境应改为服务端 AES-GCM 加密存储，前端只提交一次、只拿掩码。
-- **临时存储**：当前文件会按 24 小时 TTL 自动清理，适合演示；生产需要对象存储生命周期规则、备份和审计。
+- **存储**：JSON 适合单机演示；生产需要对象存储、备份和审计。
 - **检索**：BM25 升级为 BM25 + BGE-M3 向量混合检索。
 - **解析**：扫描版 PDF 需要 OCR（如 PaddleOCR / Tesseract）。
 - **可观测性**：补充结构化日志、请求 ID、Langfuse / OpenTelemetry 追踪。

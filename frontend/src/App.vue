@@ -25,7 +25,6 @@ const scrollElement = ref(null)
 const composer = ref(null)
 const connectionError = ref('')
 const stickToBottom = ref(true)
-let knowledgeTimer = null
 
 const sourceDrawer = reactive({
   open: false,
@@ -171,14 +170,12 @@ onMounted(async () => {
   loadHealth()
   knowledge.fetch()
   window.addEventListener('keydown', handleGlobalKey)
-  knowledgeTimer = window.setInterval(() => knowledge.fetch(), 60_000)
   await nextTick()
   scrollToBottom(true)
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('keydown', handleGlobalKey)
-  if (knowledgeTimer) window.clearInterval(knowledgeTimer)
 })
 </script>
 

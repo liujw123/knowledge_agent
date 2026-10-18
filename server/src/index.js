@@ -86,16 +86,11 @@ app.post('/api/models/list', async (request, response, next) => {
   }
 })
 
-app.get('/api/documents', async (_request, response, next) => {
-  try {
-    await knowledgeStore.cleanupExpired()
-    response.json({
-      documents: knowledgeStore.list(),
-      ...knowledgeStore.stats()
-    })
-  } catch (error) {
-    next(error)
-  }
+app.get('/api/documents', (_request, response) => {
+  response.json({
+    documents: knowledgeStore.list(),
+    ...knowledgeStore.stats()
+  })
 })
 
 app.post('/api/documents', upload.single('file'), async (request, response, next) => {
@@ -157,12 +152,6 @@ app.post('/api/chat', async (request, response) => {
     console.error('[model-config]', error)
     response.status(500).json({ error: '模型配置校验失败' })
     return
-  }
-
-  try {
-    await knowledgeStore.cleanupExpired()
-  } catch (error) {
-    console.error('[knowledge] cleanup before chat failed:', error.message)
   }
 
   response.status(200)
@@ -269,20 +258,9 @@ app.use((error, _request, response, _next) => {
 
 await knowledgeStore.init()
 
-const cleanupTimer = setInterval(async () => {
-  try {
-    const removed = await knowledgeStore.cleanupExpired()
-    if (removed) console.log(`[knowledge] removed ${removed} expired document(s)`)
-  } catch (error) {
-    console.error('[knowledge] scheduled cleanup failed:', error.message)
-  }
-}, config.cleanupIntervalMinutes * 60_000)
-cleanupTimer.unref?.()
-
 app.listen(config.port, config.host, () => {
   console.log(`[server] http://localhost:${config.port}`)
   console.log(`[server] model: ${config.deepseek.model}`)
-  console.log(`[server] knowledge TTL: ${config.documentTtlHours}h`)
   if (!config.deepseek.apiKey) {
     console.warn('[server] 未配置服务端兜底 DEEPSEEK_API_KEY，聊天模型由前端模型设置提供')
   }

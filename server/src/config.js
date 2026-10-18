@@ -33,8 +33,6 @@ export const config = {
       ? number(process.env.MAX_EXTRACTED_CHARS, 800_000)
       : 0
   },
-  documentTtlHours: Math.max(1, number(process.env.DOCUMENT_TTL_HOURS, 24)),
-  cleanupIntervalMinutes: Math.max(1, number(process.env.CLEANUP_INTERVAL_MINUTES, 10)),
   dataDir: process.env.DATA_DIR
     ? path.resolve(process.env.DATA_DIR)
     : path.join(serverRoot, 'data')

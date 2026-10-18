@@ -5,7 +5,6 @@ export const useKnowledgeStore = defineStore('knowledge', {
   state: () => ({
     documents: [],
     chunks: 0,
-    ttlHours: 24,
     loading: false,
     uploading: false,
     error: ''
@@ -21,7 +20,6 @@ export const useKnowledgeStore = defineStore('knowledge', {
         const data = await fetchDocuments()
         this.documents = data.documents || []
         this.chunks = data.chunks || 0
-        this.ttlHours = data.ttlHours || 24
       } catch (error) {
         this.error = error.message
       } finally {
@@ -36,7 +34,6 @@ export const useKnowledgeStore = defineStore('knowledge', {
         const data = await uploadDocument(file)
         this.documents.unshift(data.document)
         this.chunks = data.chunks
-        this.ttlHours = data.ttlHours || this.ttlHours
         return data.document
       } catch (error) {
         this.error = error.message
