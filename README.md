@@ -6,6 +6,16 @@
 
 > 关于 Dify：为了做到「克隆即跑、不依赖 Docker」，本实现把原方案中的 Dify 引擎替换成了 Node.js 内置的轻量 RAG + Agent 层。BFF、SSE 流式协议、DeepSeek、Agent 工具调用、引用联动这些核心架构保持不变。检索与 Agent 层是独立的，后续可以平滑替换为 Dify 或向量数据库。
 
+## 项目预览
+
+### 首页与知识库管理
+
+![首页与知识库管理](imgs/home.png)
+
+### Agent 检索与引用回答
+
+![Agent 检索与引用回答](imgs/agent-answer.png)
+
 ## 功能
 
 - **知识库扩展**：页面上传任意可解析文本的文件（PDF / DOCX / HTML / Markdown / CSV / 代码文本等），自动解析、切分、建立索引，支持手动删除。
@@ -32,6 +42,7 @@
 
 ```text
 knowledge_agent/
+├─ imgs/                      # 项目预览图
 ├─ frontend/                  # Vue 3 前端
 │  ├─ src/
 │  │  ├─ components/          # 聊天、思考链、引用抽屉、模型设置、知识库侧栏
